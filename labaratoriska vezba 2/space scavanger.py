@@ -15,19 +15,25 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 BLUE = (0, 0, 255)
-rect_x, rect_y, rect_width, rect_height = 100, 100, 200, 20
 
+#Parameters of the Health rectangle
+rect_x, rect_y, rect_width, rect_height = 100, 100, 200, 20
+#Sounds
+background_music = "background_music.wav"
+clash_sound = pygame.mixer.Sound("clash_sound.wav")
+#Images and setting sizes
 asteroid_img = pygame.image.load("asteroid.png")
 asteroid_img = pygame.transform.scale(asteroid_img, (100, 100))
-background_music = "background_music.wav"
+
 energy_crystal = pygame.image.load("energy_crystal.png")
 energy_crystal = pygame.transform.scale(energy_crystal, (50, 50))
+
 space_ship_original = pygame.image.load("spaceship.png")
 space_ship = pygame.transform.scale(space_ship_original, (100, 80))
+
 space = pygame.image.load("image.jpg")
 space = pygame.transform.scale(space, (1400, 750))
 
-clash_sound = pygame.mixer.Sound("clash_sound.wav")
 pygame.mixer.music.load(background_music)
 
 clock = pygame.time.Clock()
@@ -36,7 +42,7 @@ font = pygame.font.SysFont(None, 48)
 health = 100
 crystals_collected = 0
 start_time = 0
-high_scores = [0, 0, 0]
+high_score = 0
 crystals = []
 
 def draw_health_bar():
@@ -73,15 +79,19 @@ def spawn_asteroid():
     return asteroid_rect, asteroid_speed
 
 def display_game_over():
-    global high_scores, crystals_collected
+    global high_score, crystals_collected
     screen.fill((0, 0, 0))
     game_over_text = font.render("Game Over", True, WHITE)
     score_text = font.render(f"Score: {crystals_collected}", True, WHITE)
     try_again_text = font.render("Press R to Try Again", True, WHITE)
+    high_score_text = font.render(f"High Score is {high_score} crystals collected!", True, WHITE)
 
-    screen.blit(game_over_text, (SCREEN_WIDTH // 2 - 150, SCREEN_HEIGHT // 2 - 100))
-    screen.blit(score_text, (SCREEN_WIDTH // 2 - 150, SCREEN_HEIGHT // 2))
-    screen.blit(try_again_text, (SCREEN_WIDTH // 2 - 180, SCREEN_HEIGHT // 2 + 60))
+    screen.blit(game_over_text, (SCREEN_WIDTH // 2 - 150, SCREEN_HEIGHT // 2 - 150))
+    screen.blit(score_text, (SCREEN_WIDTH // 2 - 150, SCREEN_HEIGHT // 2 - 100))
+    screen.blit(high_score_text, (SCREEN_WIDTH // 2 - 150, SCREEN_HEIGHT // 2 - 50))
+
+
+    screen.blit(try_again_text, (SCREEN_WIDTH // 2 - 180, SCREEN_HEIGHT // 2 + 100))
 
     pygame.display.flip()
 
@@ -93,15 +103,15 @@ def display_game_over():
                 quit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
-
                     running_game_loop()
                     waiting_for_input = False
                 elif event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     quit()
 
+
 def game_loop():
-    global health, crystals_collected, start_time, high_scores, crystals
+    global health, crystals_collected, start_time, high_score, crystals
     health = 100
     crystals_collected = 0
     start_time = time.time()
@@ -182,7 +192,8 @@ def game_loop():
 
         if health <= 0:
             pygame.mixer.music.stop()
-            high_scores = sorted(high_scores + [crystals_collected], reverse=True)[:3]
+            if high_score<crystals_collected:
+                high_score = crystals_collected
             display_game_over()
             running = False
 
